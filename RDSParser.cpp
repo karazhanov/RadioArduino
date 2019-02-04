@@ -148,6 +148,8 @@ void RDSParser::processData(uint16_t block1, uint16_t block2, uint16_t block3, u
 
 			if ((_sendTime) && (mins != _lastRDSMinutes)) {
 				_lastRDSMinutes = mins;
+				Serial.print("mins = ");
+				Serial.println(mins);
 				_sendTime(mins / 60, mins % 60);
 			} // if
 			break;

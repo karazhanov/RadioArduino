@@ -6,7 +6,7 @@
 /// \copyright Copyright (c) 2014 by Matthias Hertel.\n
 /// This work is licensed under a BSD style license.\n
 /// See http://www.mathertel.de/License.aspx
-/// 
+///
 /// \details
 ///
 /// More documentation and source code is available at http://www.mathertel.de/Arduino
@@ -16,7 +16,7 @@
 /// * 01.09.2014 created and RDS sender name working.
 /// * 01.11.2014 RDS time added.
 /// * 27.03.2015 Reset RDS data by sending a 0 in blockA in the case the frequency changes.
-/// 
+///
 
 
 #ifndef __RDSPARSER_H__
@@ -24,7 +24,7 @@
 
 #include <Arduino.h>
 
-/// callback function for passing a ServicenName 
+/// callback function for passing a ServicenName
 extern "C" {
   typedef void(*receiveServicenNameFunction)(char *name);
   typedef void(*receiveTextFunction)(char *name);
@@ -46,14 +46,17 @@ public:
 
   void RDSParser::attachServicenNameCallback(receiveServicenNameFunction newFunction) {
   	_sendServiceName = newFunction;
+    Serial.println("attachServicenNameCallback");
   }
 
   void RDSParser::attachTextCallback(receiveTextFunction newFunction) {
   	_sendText = newFunction;
+    Serial.println("attachTextCallback");
   }
 
   void RDSParser::attachTimeCallback(receiveTimeFunction newFunction) {
   	_sendTime = newFunction;
+    Serial.println("attachTimeCallback");
   }
 
 
