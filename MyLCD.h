@@ -28,6 +28,7 @@
 #define CH_UP 3
 #define CH_DOWN 4
 #define AUTO 5
+#define NONE -1
 
 extern "C" {
   typedef void (*onTouch)(int button);
@@ -40,7 +41,6 @@ class MyLCD {
     Point tp;
     void drawRadioUI();
     bool pointInRect();
-    bool pressed = false;
     uint16_t currentFreq = -1;
     onTouch _onTouch = NULL;
   public:

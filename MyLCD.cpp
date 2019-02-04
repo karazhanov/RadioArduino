@@ -72,6 +72,7 @@ void MyLCD::updateDHT(MyDht *dht) {
 
 void MyLCD::updateFreq(uint16_t freq) {
   if(freq != currentFreq) {
+     tft.fillRect(6, 6, 184, 104, BLACK);
      tft.setTextColor(GREEN);
      tft.setTextSize(2);
      tft.setCursor(20, 17);
@@ -88,49 +89,47 @@ void MyLCD::detectTouch() {
      pinMode(XM, OUTPUT);
      pinMode(YP, OUTPUT);
 
-     if(!pressed) {
-       if (tp.z > MINPRESSURE && tp.z < MAXPRESSURE) {
+     if (tp.z > MINPRESSURE && tp.z < MAXPRESSURE) {
         ypos = map(tp.x, TS_MINX, TS_MAXX, 0, tft.height());
         xpos = map(tp.y, TS_MINY, TS_MAXY, tft.width(), 0);
-        pressed = true;
        // ch+
        if(pointInRect(xpos, ypos, 100, 130, 90, 40)) {
-          Serial.println("CH + ");
           if (_onTouch) {
       			_onTouch(CH_UP);
       		}
+          return;
        }
        //  ch-
        if(pointInRect(xpos, ypos, 100, 190, 90, 40)) {
-          Serial.println("CH - ");
           if (_onTouch) {
       			_onTouch(CH_DOWN);
       		}
+          return;
        }
        // vol+
        if(pointInRect(xpos, ypos, 4, 130, 90, 40)) {
-          Serial.println("VOL + ");
           if (_onTouch) {
       			_onTouch(VOL_UP);
       		}
+          return;
        }
        // vol-
        if(pointInRect(xpos, ypos, 4, 190, 90, 40)) {
-          Serial.println("VOL - ");
           if (_onTouch) {
       			_onTouch(VOL_DOWN);
       		}
+          return;
        }
        // auto
        if(pointInRect(xpos, ypos, 200, 130, 115, 100)) {
-          Serial.println("AUTO");
           if (_onTouch) {
       			_onTouch(AUTO);
       		}
+          return;
        }
-     } else {
-       pressed = false;
-     }
+   }
+   if (_onTouch) {
+       _onTouch(NONE);
    }
 }
 

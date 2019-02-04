@@ -61,7 +61,7 @@ typedef void (*receiveRDSFunction)(uint16_t block1, uint16_t block2, uint16_t bl
 class BT_RDA5807M {
 public:
 
-	bool _debugEnabled = false;
+	bool _debugEnabled = true;
 
 	BT_RDA5807M();
 
