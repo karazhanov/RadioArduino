@@ -1,20 +1,3 @@
-/// \file RDA5807M.cpp
-/// \brief Implementation for the radio library to control the RDA5807M radio chip.
-///
-/// \author Matthias Hertel, http://www.mathertel.de
-/// \copyright Copyright (c) 2014-2015 by Matthias Hertel.\n
-/// This work is licensed under a BSD style license.\n
-/// See http://www.mathertel.de/License.aspx
-///
-/// This library enables the use of the radio chip RDA5807M from http://www.rdamicro.com/.
-///
-/// More documentation and source code is available at http://www.mathertel.de/Arduino
-///
-/// History:
-/// --------
-/// * 05.08.2014 created.
-
-
 #include <Arduino.h>
 #include <Wire.h>
 
@@ -94,15 +77,11 @@ RDA5807M::RDA5807M() {
 // initialize all internals.
 bool RDA5807M::init() {
   bool result = false; // no chip found yet.
-  DEBUG_FUNC0("init");
-
   Wire.begin();
   Wire.beginTransmission(I2C_INDX);
   result = Wire.endTransmission();
   if (result == 0) {
-    DEBUG_STR("radio found.");
     result = true;
-
     // initialize all registers
     registers[RADIO_REG_CHIPID] = 0x5804;  // 00 id
     registers[1] = 0x0000;  // 01 not used
@@ -128,7 +107,6 @@ bool RDA5807M::init() {
 // switch the power off
 void RDA5807M::term()
 {
-  DEBUG_FUNC0("term");
   setVolume(0);
   registers[RADIO_REG_CTRL] = 0x0000;   // all bits off
   _saveRegisters();
@@ -238,7 +216,6 @@ RADIO_FREQ RDA5807M::getFrequency() {
 
 
 void RDA5807M::setFrequency(RADIO_FREQ newF) {
-  DEBUG_FUNC1("setFrequency", newF);
   uint16_t newChannel;
   uint16_t regChannel = registers[RADIO_REG_CHAN] & (RADIO_REG_CHAN_SPACE | RADIO_REG_CHAN_BAND);
 
@@ -308,7 +285,6 @@ void RDA5807M::_readRegisters()
 // using the sequential write access mode.
 void RDA5807M::_saveRegisters()
 {
-  DEBUG_FUNC0("-saveRegisters");
   Wire.beginTransmission(I2C_SEQ);
   for (int i = 2; i <= 6; i++)
   _write16(registers[i]);
@@ -319,8 +295,6 @@ void RDA5807M::_saveRegisters()
 // Save one register back to the chip
 void RDA5807M::_saveRegister(byte regNr)
 {
-  DEBUG_FUNC2X("-_saveRegister", regNr, registers[regNr]);
-
   Wire.beginTransmission(I2C_INDX);
   Wire.write(regNr);
   _write16(registers[regNr]);
@@ -345,18 +319,8 @@ uint16_t RDA5807M::_read16(void)
 } // _read16
 
 
-// return current Radio Station Strength Information
-// uint8_t RDA5807M::getRSSI() {
-//   _readRegisters();
-//   uint8_t rssi = registers[RADIO_REG_RB] >> 10;
-//   return(rssi);
-// } // getRSSI
-
-
 void RDA5807M::checkRDS()
 {
-  // DEBUG_FUNC0("checkRDS");
-
   // check RDS data if there is a listener !
   if (_sendRDS) {
 
@@ -364,10 +328,6 @@ void RDA5807M::checkRDS()
     Wire.requestFrom (I2C_SEQ, 2);
     registers[RADIO_REG_RA] = _read16();
     Wire.endTransmission();
-
-    if (registers[RADIO_REG_RA] & RADIO_REG_RA_RDSBLOCK) {
-      DEBUG_STR("BLOCK_E found.");
-    } // if
 
     if (registers[RADIO_REG_RA] & RADIO_REG_RA_RDS) {
       // check for new RDS data available
@@ -420,82 +380,6 @@ void RDA5807M::getRadioInfo(RADIO_INFO *info) {
   if (registers[RADIO_REG_RB] & RADIO_REG_RB_FMTRUE) info->tuned = true;
   if (registers[RADIO_REG_CTRL] & RADIO_REG_CTRL_MONO) info->mono = true;
 } // getRadioInfo()
-
-
-// ----- Debug functions -----
-
-void RDA5807M::debugScan()
-{
-  DEBUG_FUNC0("debugScan");
-  uint16_t regChannel = registers[RADIO_REG_CHAN] & (RADIO_REG_CHAN_SPACE | RADIO_REG_CHAN_BAND);
-  RADIO_FREQ f = _freqLow;
-  int channel = 0;
-  
-  while (f < _freqHigh) {
-    registers[RADIO_REG_CHAN] = regChannel | RADIO_REG_CHAN_TUNE | (channel << 6);
-    _saveRegister(RADIO_REG_CHAN);
-    
-    delay(500);
-    debugStatus();
-
-    f += _freqSteps;
-    channel += 1;
-  } // while
-} // debugScan
-
-
-// send a status report to the serial port
-// dump all registers to Serial output
-void RDA5807M::debugStatus()
-{
-  char s[12];
-
-  // read data from registers A .. F of the chip into class memory
-  _readRegisters();
-
-  formatFrequency(s, sizeof(s));
-  Serial.print("Frequency="); Serial.print(s);
-
-  uint16_t pi = registers[RADIO_REG_RDSA];
-  Serial.print(" PI="); _printHex4(pi);
-
-  Serial.print((registers[RADIO_REG_RA] & RADIO_REG_RA_STEREO) ? " Stereo" : " Mono  ");
-  Serial.print((registers[RADIO_REG_RA] & RADIO_REG_RA_RDS)    ? " ---"    : " RDS");
-  
-  int rssi = registers[RADIO_REG_RB] >> 10;
-
-  Serial.print(" Sig="); if (rssi < 10) Serial.write(' ');
-  Serial.print(rssi);
-  Serial.print(' ');
-  for(int i = 0;i < rssi - 15;i++) {Serial.write('*');} // Empfangspegel ab 15. Zeichen
-  Serial.println();
-
-  // ruler
-  Serial.println("0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F");
-  // variables
-  for (int n = 0; n < 16; n++) { _printHex4(registers[n]); }
-  Serial.println();
-  
-  // registers
-  Wire.beginTransmission(I2C_INDX);                // Device 0x11 for random access
-  Wire.write(0x00);                   // Start at Register 0x0C
-  Wire.endTransmission(0);                         // restart condition
-  Wire.requestFrom(I2C_INDX,32,1);                  // Retransmit device address with READ, followed by 8 bytes
-  for (int n = 0; n < 16; n++) {
-    _printHex4(_read16());
-  }
-  Wire.endTransmission();
-  Serial.println();
-  
-  // clear text information in Registers
-  if (getBassBoost()) Serial.print("BassBoost ");
-  if (getMono()) Serial.print("Mono ");
-  int v = getVolume();
-  Serial.print("Volume="); Serial.print(v); Serial.print(' ');
-  Serial.println();
-
-} // debugStatus
-
 
 // ----- internal functions -----
 

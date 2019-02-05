@@ -7,8 +7,8 @@
   #include <TouchScreen.h>
   #include <Adafruit_Sensor.h>
 
-  #define MINPRESSURE 200
-  #define MAXPRESSURE 1000
+  #define MINPRESSURE 250
+  #define MAXPRESSURE 500
   #define TS_MINX 152
   #define TS_MINY 145
   #define TS_MAXX 927
@@ -43,14 +43,17 @@ typedef struct TOUCH_INFO {
 
 class MyLCD {
   private:
+    void drawRadioUI();
+    bool pointInRect();
+    TOUCH_INFO getPressedInfo();
+    void checkPress(Adafruit_GFX_Button &button, TOUCH_INFO &touch, int keyCode);
+    
     MCUFRIEND_kbv tft;       // hard-wired for UNO shields anyway.
     TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
     Point tp;
-    void drawRadioUI();
-    bool pointInRect();
     uint16_t currentFreq = -1;
     onTouch _onTouch = NULL;
-    Adafruit_GFX_Button volumeUp, volumeDown, chanelUp, chanelDown, autoSearch;
+    Adafruit_GFX_Button chanelUp, chanelDown, volumeUp, volumeDown, autoSearch;
   public:
     MyLCD();
     void init();

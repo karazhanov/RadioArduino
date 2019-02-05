@@ -1,43 +1,12 @@
-/// \file Radio.cpp
-/// \brief Library implementation for the radio libraries to control radio chips.
-///
-/// \author Matthias Hertel, http://www.mathertel.de
-/// \copyright Copyright (c) 2014 by Matthias Hertel.\n
-/// This work is licensed under a BSD style license.\n
-/// See http://www.mathertel.de/License.aspx
-///
-/// \details
-/// This library enables the use of diverse radio chips by sharing the same class definition.
-/// Implementation for the following Radio Chips are available:
-/// * RDA5807M
-/// * SI4703
-///
-/// The following chip is planned to be supported too:
-/// * TEA5767
-///
-/// More documentation and source code is available at http://www.mathertel.de/Arduino
-///
-/// ChangeLog see: radio.h
-
 #include "Arduino.h"
 
 #include "radio.h"
 
-// ----- Register Definitions -----
-
-// no chip-registers without a chip.
-
-
-// ----- implement
-
-/// Setup the radio object and initialize private variables to 0.
-/// Don't change the radio chip (yet).
 RADIO::RADIO() {
   memset(this, 0, sizeof(RADIO));
 } // RADIO()
 
 
-/// The RADIO class doesn't implement a concrete chip so nothing has to be initialized.
 bool RADIO::init() {
   return(false);
 } // init()
@@ -240,45 +209,6 @@ void RADIO::formatFrequency(char *s, uint8_t length) {
   } // if
 
 } // formatFrequency()
-
-
-// enable debugging information on Serial port.
-void RADIO::debugEnable(bool enable) {
-  _debugEnabled = enable;
-} // debugEnable()
-
-
-// print out all radio information
-void RADIO::debugRadioInfo() {
-  RADIO_INFO info;
-  this->getRadioInfo(&info);
-
-  Serial.print(info.rds    ? " RDS"    : " ---");
-  Serial.print(info.tuned  ? " TUNED"  : " -----");
-  Serial.print(info.stereo ? " STEREO" : "  MONO ");
-  Serial.print("  RSSI: "); Serial.print(info.rssi);
-  Serial.print("  SNR: "); Serial.print(info.snr);
-  Serial.println();
-} // debugRadioInfo()
-
-
-// print out all audio information
-void RADIO::debugAudioInfo() {
-  AUDIO_INFO info;
-  this->getAudioInfo(&info);
-
-  Serial.print(info.bassBoost ? " BASS"  : " ----");
-  Serial.print(info.mute      ? " MUTE"  : " ----");
-  Serial.print(info.softmute  ? " SOFTMUTE"  : " --------");
-  Serial.println();
-} // debugAudioInfo()
-
-
-/// The RADIO class doesn't have interesting status information so nothing is sent.
-void RADIO::debugStatus() {
-  // no output.
-} // debugStatus
-
 
 /// This is a special format routine used to format frequencies as strings with leading blanks.
 /// up to 5 digits only ("    0".."99999")

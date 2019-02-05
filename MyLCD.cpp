@@ -23,11 +23,16 @@ void MyLCD::drawRadioUI() {
   tft.fillRect(200, 65, 116, 46, GREEN); // x, y, w, h, r, color
   tft.fillRect(202, 67, 112, 42, BLACK); // x, y, w, h, r, color
 
-   volumeUp.initButton(&tft,  4, 130, 90, 40, GREEN, GREEN, WHITE, "Vol +", 2);
-   volumeDown.initButton(&tft,  4, 190, 90, 40, RED, RED, WHITE, "Vol -", 2);
-   chanelUp.initButton(&tft,  100, 130, 90, 40, GREEN, GREEN, WHITE, "CH +", 2);
-   chanelDown.initButton(&tft,  100, 190, 90, 40, RED, RED, WHITE, "CH -", 2);
-   autoSearch.initButton(&tft,  200, 130, 115, 100, BLUE, BLUE, WHITE, "AUTO\TUNE", 2);
+   volumeUp.initButtonUL(&tft,  4, 130, 90, 40, GREEN, GREEN, WHITE, "Vol +", 2);
+   volumeUp.drawButton();
+   volumeDown.initButtonUL(&tft,  4, 190, 90, 40, RED, RED, WHITE, "Vol -", 2);
+   volumeDown.drawButton();
+   chanelUp.initButtonUL(&tft,  100, 130, 90, 40, GREEN, GREEN, WHITE, "CH +", 2);
+   chanelUp.drawButton();
+   chanelDown.initButtonUL(&tft,  100, 190, 90, 40, RED, RED, WHITE, "CH -", 2);
+   chanelDown.drawButton();
+   autoSearch.initButtonUL(&tft,  200, 130, 115, 100, BLUE, BLUE, WHITE, "AUTO\TUNE", 2);
+   autoSearch.drawButton();
 
   // tft.setTextSize(2);
   // tft.setTextColor(WHITE);
@@ -89,8 +94,8 @@ void MyLCD::updateFreq(uint16_t freq) {
   }
 }
 
-TOUCH_INFO getPressedInfo() {
-  tp = ts.getPoint();   //tp.x, tp.y are ADC values
+TOUCH_INFO MyLCD::getPressedInfo() {
+  Point tp = ts.getPoint();   //tp.x, tp.y are ADC values
   pinMode(XM, OUTPUT);
   pinMode(YP, OUTPUT);
   digitalWrite(YP, HIGH);   //because TFT control pins
@@ -104,13 +109,14 @@ TOUCH_INFO getPressedInfo() {
   return info;
 }
 
-inline void checkPress(Adafruit_GFX_Button &button, TOUCH_INFO &touch, int keyCode) {
+void MyLCD::checkPress(Adafruit_GFX_Button &button, TOUCH_INFO &touch, int keyCode) {
   button.press(touch.pressed && button.contains(touch.xpos, touch.ypos));
   if (button.justPressed()) {
     button.drawButton(true);
     if (_onTouch) {
  			_onTouch(keyCode);
  		}
+    delay(500);
     return;
   }
   if (button.justReleased()) {
@@ -120,14 +126,15 @@ inline void checkPress(Adafruit_GFX_Button &button, TOUCH_INFO &touch, int keyCo
 
 void MyLCD::detectTouch() {
    TOUCH_INFO touch = getPressedInfo();
-   volumeUp.press(touch.pressed && volumeUp.contains(touch.xpos, touch.ypos));
-   volumeDown.press(touch.pressed && volumeDown.contains(touch.xpos, touch.ypos));
-   chanelUp.press(touch.pressed && chanelUp.contains(touch.xpos, touch.ypos));
-   chanelDown.press(touch.pressed && chanelDown.contains(touch.xpos, touch.ypos));
-   autoSearch.press(touch.pressed && autoSearch.contains(touch.xpos, touch.ypos));
+//   chanelUp.press(touch.pressed && chanelUp.contains(touch.xpos, touch.ypos));
+//   chanelDown.press(touch.pressed && chanelDown.contains(touch.xpos, touch.ypos));
+
+//   volumeUp.press(touch.pressed && volumeUp.contains(touch.xpos, touch.ypos));
+//   volumeDown.press(touch.pressed && volumeDown.contains(touch.xpos, touch.ypos));
+//   autoSearch.press(touch.pressed && autoSearch.contains(touch.xpos, touch.ypos));
 
 
-   checkPress(volumeUp, touch, VOL_UP);
+   checkPress(chanelUp, touch, CH_UP);
 
    //   if (tp.z > MINPRESSURE && tp.z < MAXPRESSURE) {
    //      ypos = map(tp.x, TS_MINX, TS_MAXX, 0, tft.height());

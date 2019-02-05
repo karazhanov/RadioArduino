@@ -1,9 +1,9 @@
-fru#include "MyLCD.h"
+#include "MyLCD.h"
 #include "MyDht.h"
 #include "RDA5807M.h"
 #include "RDSParser.h"
 
-MyDht dht;
+//MyDht dht;
 MyLCD lcd;
 
 int button = NONE;
@@ -15,16 +15,16 @@ uint16_t maxFreq;
 uint16_t minFreq;
 char tmpBuff[10];
 
-RDSParser rds;
+//RDSParser rds;
 char rdsServiceName[8 + 2];
 char rdsText[64 + 2];
 char rdsTime[6];
-#define RDS_SCROLL_POSITION_BEGIN -13
-int8_t rdsTextScrollPosition = RDS_SCROLL_POSITION_BEGIN;
+//#define RDS_SCROLL_POSITION_BEGIN -13
+//int8_t rdsTextScrollPosition = RDS_SCROLL_POSITION_BEGIN;
 
 void setup(void) {
   Serial.begin(9600);
-  dht.init();
+//  dht.init();
   lcd.init();
   lcd.attachOnTouch(onTouchScreen);
 
@@ -36,22 +36,22 @@ void setup(void) {
 
   delay(1000);
 
-	rds.init();
+//	rds.init();
 
-	rds.attachServicenNameCallback(rdsDisplayServiceName);
-	rds.attachTextCallback(rdsDisplayText);
-	rds.attachTimeCallback(rdsDisplayTime);
+//	rds.attachServicenNameCallback(rdsDisplayServiceName);
+//	rds.attachTextCallback(rdsDisplayText);
+//	rds.attachTimeCallback(rdsDisplayTime);
 //  lcd.updateFreq(radioInfo.currentFreq);
-  Serial.println("debugStatus()");
-  radio.debugStatus();
+//  Serial.println("debugStatus()");
+//  radio.debugStatus();
 }
 
 void loop() {
-    dht.update();
+//    dht.update();
 //    radioInfoLoop();
     radio.checkRDS();
      lcd.detectTouch();
-     lcd.updateDHT(&dht);
+//     lcd.updateDHT(&dht);
 //    lcd.updateFreq(radioInfo.currentFreq);
 
 }
@@ -83,7 +83,7 @@ void onTouchScreen(int buttonId) {
 }
 
 void rdsProcess(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t block4) {
-  rds.processData(block1, block2, block3, block4);
+//  rds.processData(block1, block2, block3, block4);
 }
 
 void rdsDisplayServiceName(char *name) {
