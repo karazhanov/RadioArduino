@@ -23,31 +23,37 @@ void MyLCD::drawRadioUI() {
   tft.fillRect(200, 65, 116, 46, GREEN); // x, y, w, h, r, color
   tft.fillRect(202, 67, 112, 42, BLACK); // x, y, w, h, r, color
 
-  tft.setTextSize(2);
-  tft.setTextColor(WHITE);
-  //  vol+
-  tft.fillRect(4, 130, 90, 40, GREEN); // x, y, w, h, r, color
-  tft.setCursor(20, 145);
-  tft.print(F("Vol +"));
-  //  vol-
-  tft.fillRect(4, 190, 90, 40, RED); // x, y, w, h, r, color
-  tft.setCursor(20, 205);
-  tft.print(F("Vol -"));
-  //  ch+
-  tft.fillRect(100, 130, 90, 40, GREEN); // x, y, w, h, r, color
-  tft.setCursor(120, 145);
-  tft.print(F("CH +"));
-  //  ch-
-  tft.fillRect(100, 190, 90, 40, RED); // x, y, w, h, r, color
-  tft.setCursor(120, 205);
-  tft.print(F("CH -"));
-  // auto
-  tft.setTextSize(3);
-  tft.fillRect(200, 130, 115, 100, BLUE); // x, y, w, h, r, color
-  tft.setCursor(220, 145);
-  tft.print(F("AUTO"));
-  tft.setCursor(220, 190);
-  tft.print(F("TUNE"));
+   volumeUp.initButton(&tft,  4, 130, 90, 40, GREEN, GREEN, WHITE, "Vol +", 2);
+   volumeDown.initButton(&tft,  4, 190, 90, 40, RED, RED, WHITE, "Vol -", 2);
+   chanelUp.initButton(&tft,  100, 130, 90, 40, GREEN, GREEN, WHITE, "CH +", 2);
+   chanelDown.initButton(&tft,  100, 190, 90, 40, RED, RED, WHITE, "CH -", 2);
+   autoSearch.initButton(&tft,  200, 130, 115, 100, BLUE, BLUE, WHITE, "AUTO\TUNE", 2);
+
+  // tft.setTextSize(2);
+  // tft.setTextColor(WHITE);
+  // //  vol+
+  // tft.fillRect(4, 130, 90, 40, GREEN); // x, y, w, h, r, color
+  // tft.setCursor(20, 145);
+  // tft.print(F("Vol +"));
+  // //  vol-
+  // tft.fillRect(4, 190, 90, 40, RED); // x, y, w, h, r, color
+  // tft.setCursor(20, 205);
+  // tft.print(F("Vol -"));
+  // //  ch+
+  // tft.fillRect(100, 130, 90, 40, GREEN); // x, y, w, h, r, color
+  // tft.setCursor(120, 145);
+  // tft.print(F("CH +"));
+  // //  ch-
+  // tft.fillRect(100, 190, 90, 40, RED); // x, y, w, h, r, color
+  // tft.setCursor(120, 205);
+  // tft.print(F("CH -"));
+  // // auto
+  // tft.setTextSize(3);
+  // tft.fillRect(200, 130, 115, 100, BLUE); // x, y, w, h, r, color
+  // tft.setCursor(220, 145);
+  // tft.print(F("AUTO"));
+  // tft.setCursor(220, 190);
+  // tft.print(F("TUNE"));
 }
 
 void MyLCD::updateDHT(MyDht *dht) {
@@ -83,59 +89,86 @@ void MyLCD::updateFreq(uint16_t freq) {
   }
 }
 
-void MyLCD::detectTouch() {
-     uint16_t xpos, ypos;  //screen coordinates
-     tp = ts.getPoint();   //tp.x, tp.y are ADC values
-     pinMode(XM, OUTPUT);
-     pinMode(YP, OUTPUT);
-
-     if (tp.z > MINPRESSURE && tp.z < MAXPRESSURE) {
-        ypos = map(tp.x, TS_MINX, TS_MAXX, 0, tft.height());
-        xpos = map(tp.y, TS_MINY, TS_MAXY, tft.width(), 0);
-       // ch+
-       if(pointInRect(xpos, ypos, 100, 130, 90, 40)) {
-          if (_onTouch) {
-      			_onTouch(CH_UP);
-      		}
-          return;
-       }
-       //  ch-
-       if(pointInRect(xpos, ypos, 100, 190, 90, 40)) {
-          if (_onTouch) {
-      			_onTouch(CH_DOWN);
-      		}
-          return;
-       }
-       // vol+
-       if(pointInRect(xpos, ypos, 4, 130, 90, 40)) {
-          if (_onTouch) {
-      			_onTouch(VOL_UP);
-      		}
-          return;
-       }
-       // vol-
-       if(pointInRect(xpos, ypos, 4, 190, 90, 40)) {
-          if (_onTouch) {
-      			_onTouch(VOL_DOWN);
-      		}
-          return;
-       }
-       // auto
-       if(pointInRect(xpos, ypos, 200, 130, 115, 100)) {
-          if (_onTouch) {
-      			_onTouch(AUTO);
-      		}
-          return;
-       }
-   }
-   if (_onTouch) {
-       _onTouch(NONE);
-   }
+TOUCH_INFO getPressedInfo() {
+  tp = ts.getPoint();   //tp.x, tp.y are ADC values
+  pinMode(XM, OUTPUT);
+  pinMode(YP, OUTPUT);
+  digitalWrite(YP, HIGH);   //because TFT control pins
+  digitalWrite(XM, HIGH);
+  TOUCH_INFO info;
+  if (tp.z > MINPRESSURE && tp.z < MAXPRESSURE) {
+    info.pressed = true;
+    info.ypos = map(tp.x, TS_MINX, TS_MAXX, 0, tft.height());
+    info.xpos = map(tp.y, TS_MINY, TS_MAXY, tft.width(), 0);
+  }
+  return info;
 }
 
-bool MyLCD::pointInRect(uint16_t xpos, uint16_t ypos, uint16_t x0, uint16_t y0, uint16_t w, uint16_t h) {
-   return xpos >= x0 &&
-           xpos <= (x0 + w) &&
-           ypos >= y0 &&
-           ypos <= (y0 + h);
+inline void checkPress(Adafruit_GFX_Button &button, TOUCH_INFO &touch, int keyCode) {
+  button.press(touch.pressed && button.contains(touch.xpos, touch.ypos));
+  if (button.justPressed()) {
+    button.drawButton(true);
+    if (_onTouch) {
+ 			_onTouch(keyCode);
+ 		}
+    return;
+  }
+  if (button.justReleased()) {
+      button.drawButton();
+  }
+}
+
+void MyLCD::detectTouch() {
+   TOUCH_INFO touch = getPressedInfo();
+   volumeUp.press(touch.pressed && volumeUp.contains(touch.xpos, touch.ypos));
+   volumeDown.press(touch.pressed && volumeDown.contains(touch.xpos, touch.ypos));
+   chanelUp.press(touch.pressed && chanelUp.contains(touch.xpos, touch.ypos));
+   chanelDown.press(touch.pressed && chanelDown.contains(touch.xpos, touch.ypos));
+   autoSearch.press(touch.pressed && autoSearch.contains(touch.xpos, touch.ypos));
+
+
+   checkPress(volumeUp, touch, VOL_UP);
+
+   //   if (tp.z > MINPRESSURE && tp.z < MAXPRESSURE) {
+   //      ypos = map(tp.x, TS_MINX, TS_MAXX, 0, tft.height());
+   //      xpos = map(tp.y, TS_MINY, TS_MAXY, tft.width(), 0);
+   //     // ch+
+   //     if(pointInRect(xpos, ypos, 100, 130, 90, 40)) {
+   //        if (_onTouch) {
+   //    			_onTouch(CH_UP);
+   //    		}
+   //        return;
+   //     }
+   //     //  ch-
+   //     if(pointInRect(xpos, ypos, 100, 190, 90, 40)) {
+   //        if (_onTouch) {
+   //    			_onTouch(CH_DOWN);
+   //    		}
+   //        return;
+   //     }
+   //     // vol+
+   //     if(pointInRect(xpos, ypos, 4, 130, 90, 40)) {
+   //        if (_onTouch) {
+   //    			_onTouch(VOL_UP);
+   //    		}
+   //        return;
+   //     }
+   //     // vol-
+   //     if(pointInRect(xpos, ypos, 4, 190, 90, 40)) {
+   //        if (_onTouch) {
+   //    			_onTouch(VOL_DOWN);
+   //    		}
+   //        return;
+   //     }
+   //     // auto
+   //     if(pointInRect(xpos, ypos, 200, 130, 115, 100)) {
+   //        if (_onTouch) {
+   //    			_onTouch(AUTO);
+   //    		}
+   //        return;
+   //     }
+   // }
+   // if (_onTouch) {
+   //     _onTouch(NONE);
+   // }
 }

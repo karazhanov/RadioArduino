@@ -2,6 +2,7 @@
   #define __MY_LCD_H__
 
   #include "MyDht.h"
+  #include <Adafruit_GFX.h>
   #include <MCUFRIEND_kbv.h>
   #include <TouchScreen.h>
   #include <Adafruit_Sensor.h>
@@ -34,6 +35,12 @@ extern "C" {
   typedef void (*onTouch)(int button);
 }
 
+typedef struct TOUCH_INFO {
+  uint16_t xpos = -1;
+  uint16_t ypos = -1;
+  bool pressed = false;
+};
+
 class MyLCD {
   private:
     MCUFRIEND_kbv tft;       // hard-wired for UNO shields anyway.
@@ -43,6 +50,7 @@ class MyLCD {
     bool pointInRect();
     uint16_t currentFreq = -1;
     onTouch _onTouch = NULL;
+    Adafruit_GFX_Button volumeUp, volumeDown, chanelUp, chanelDown, autoSearch;
   public:
     MyLCD();
     void init();

@@ -1,4 +1,4 @@
-#include "MyLCD.h"
+fru#include "MyLCD.h"
 #include "MyDht.h"
 #include "RDA5807M.h"
 #include "RDSParser.h"
@@ -32,10 +32,9 @@ void setup(void) {
 	radio.setBand(RADIO_BAND_FM);
   radio.setFrequency(10700);
 	radio.attachReceiveRDS(rdsProcess);
+  radio.setVolume(5);
 
- radio.setVolume(5);
-
-delay(1000);
+  delay(1000);
 
 	rds.init();
 
