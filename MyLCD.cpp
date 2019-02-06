@@ -79,15 +79,15 @@ void MyLCD::updateDHT(MyDht *dht) {
   dht->dropChanges();
 }
 
-void MyLCD::updateFreq(uint16_t freq) {
+void MyLCD::updateFreq(uint16_t freq, char* text) {
   if(freq != currentFreq) {
      tft.fillRect(6, 6, 184, 104, BLACK);
      tft.setTextColor(GREEN);
      tft.setTextSize(2);
      tft.setCursor(20, 17);
-     char tmpBuff[10];
-     sprintf(tmpBuff, "%3d.%1d MHz", freq / 100, (freq % 100) / 10);
-     tft.print(tmpBuff);
+//     char tmpBuff[11];
+//     sprintf(tmpBuff, "%3d.%2d MHz", freq / 100, freq % 100);
+     tft.print(text);
      currentFreq = freq;
   }
 }
@@ -120,6 +120,7 @@ bool MyLCD::checkPress(Adafruit_GFX_Button &button, TOUCH_INFO &touch, int keyCo
   if (button.justReleased()) {
       button.drawButton();
   }
+  return false;
 }
 
 void MyLCD::detectTouch() {
@@ -132,7 +133,10 @@ void MyLCD::detectTouch() {
 //   volumeDown.press(touch.pressed && volumeDown.contains(touch.xpos, touch.ypos));
 //   autoSearch.press(touch.pressed && autoSearch.contains(touch.xpos, touch.ypos));
 
-
-   checkPress(chanelUp, touch, CH_UP);
+   if(checkPress(volumeUp, touch, VOL_UP)) return;
+   if(checkPress(volumeDown, touch, VOL_DOWN)) return;
+   if(checkPress(chanelUp, touch, CH_UP)) return;
+   if(checkPress(chanelDown, touch, CH_DOWN)) return;
+   checkPress(autoSearch, touch, AUTO);
  }
 }

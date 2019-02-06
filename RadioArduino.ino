@@ -1,9 +1,8 @@
 #include "MyLCD.h"
 #include "MyDht.h"
 #include "RDA5807M.h"
-#include "RDSParser.h"
 
-//MyDht dht;
+MyDht dht;
 MyLCD lcd;
 
 int button = NONE;
@@ -13,56 +12,48 @@ RADIO_INFO radioInfo;
 uint16_t freqStep;
 uint16_t maxFreq;
 uint16_t minFreq;
-char tmpBuff[10];
+char tmpBuff[12];
 
-//RDSParser rds;
 char rdsServiceName[8 + 2];
 char rdsText[64 + 2];
 char rdsTime[6];
-//#define RDS_SCROLL_POSITION_BEGIN -13
-//int8_t rdsTextScrollPosition = RDS_SCROLL_POSITION_BEGIN;
 
 void setup(void) {
   Serial.begin(9600);
-//  dht.init();
+  dht.init();
   lcd.init();
   lcd.attachOnTouch(onTouchScreen);
 
-  radio.init();
+  radio.init(rdsDisplayServiceName, rdsDisplayText, rdsDisplayTime);
 	radio.setBand(RADIO_BAND_FM);
   radio.setFrequency(10700);
-	radio.attachReceiveRDS(rdsProcess);
   radio.setVolume(5);
 
   delay(1000);
-
-//	rds.init();
-
-//	rds.attachServicenNameCallback(rdsDisplayServiceName);
-//	rds.attachTextCallback(rdsDisplayText);
-//	rds.attachTimeCallback(rdsDisplayTime);
-//  lcd.updateFreq(radioInfo.currentFreq);
-//  Serial.println("debugStatus()");
-//  radio.debugStatus();
+  radio.formatFrequency(tmpBuff, 12);
+  lcd.updateFreq(radio.getFrequency(), tmpBuff); 
 }
 
 void loop() {
-//    dht.update();
+    lcd.detectTouch();
+    dht.update();
 //    radioInfoLoop();
-    radio.checkRDS();
-     lcd.detectTouch();
-//     lcd.updateDHT(&dht);
-//    lcd.updateFreq(radioInfo.currentFreq);
+    lcd.updateDHT(&dht);
 
+    radio.getRadioInfo(&radioInfo);
+    if( radioInfo.tuned) {
+      radio.formatFrequency(tmpBuff, 12);
+      lcd.updateFreq(radio.getFrequency(), tmpBuff);
+    }
 }
 
 void onTouchScreen(int buttonId) {
   if(button != buttonId) {
     button = buttonId;
-    switch (button) {
+    switch (buttonId) {
       case CH_UP:
         Serial.println("CH +");
-        radio.seekUp(true);
+        radio.seekUp(true);        
         break;
       case CH_DOWN:
         Serial.println("CH -");
@@ -79,11 +70,8 @@ void onTouchScreen(int buttonId) {
         break;
        default:;
     }
+    button = NONE;
   }
-}
-
-void rdsProcess(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t block4) {
-//  rds.processData(block1, block2, block3, block4);
 }
 
 void rdsDisplayServiceName(char *name) {
@@ -93,9 +81,6 @@ void rdsDisplayServiceName(char *name) {
 }
 
 void rdsDisplayText(char *text) {
-//    Serial.print(F("RDS-text: '"));
-//    Serial.print(text);
-//    Serial.println(F("'"));
     if (strlen(text) == 0) {
       return;
     }
@@ -127,12 +112,25 @@ void rdsDisplayTime(uint8_t hour, uint8_t minute) {
 
 void radioInfoLoop() {
   radio.getRadioInfo(&radioInfo);
-  if (radioInfo.tuned) {
-    if(radioInfo.rds) {
-       Serial.print(F("RDS "));
-    } else {
-      Serial.print(F("NO RDS "));
-    }
+  long f = radio.getFrequency();
+  sprintf(tmpBuff, " %5d MHz |", f);
+  Serial.print(tmpBuff);
+  sprintf(tmpBuff, " %3d.%2d MHz", f / 100, f % 100);
+  Serial.print(tmpBuff);
+  sprintf(tmpBuff, "| tuned=%1d", radioInfo.tuned?1:0);
+  Serial.print(tmpBuff);
+  sprintf(tmpBuff, "| rds=%1d", radioInfo.rds?1:0);
+  Serial.print(tmpBuff);
+  sprintf(tmpBuff, "| rssi=%d", radioInfo.rssi);
+  Serial.print(tmpBuff);
+  sprintf(tmpBuff, "| snr=%d", radioInfo.snr);
+  Serial.println(tmpBuff);
+  
+  
+//  if (radioInfo.tuned) {
+//    if(radioInfo.rds) {
+//       Serial.println(F("RDS "));
+//    }
 //		Serial.print(F("rssi "));
 //    uint8_t rssi = map(radioInfo.rssi, 0, 0b111111, 0, 10);
 //  	sprintf(tmpBuff, " %2d", radioInfo.rssi);
@@ -140,4 +138,5 @@ void radioInfoLoop() {
 //    sprintf(tmpBuff, " %3d.%1d", radioInfo.currentFreq / 100, (radioInfo.currentFreq % 100) / 10);
 //  	Serial.print(tmpBuff);
 //  	Serial.println(F(" MHz"));
-}}
+//}
+}

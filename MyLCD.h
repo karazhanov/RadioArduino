@@ -53,13 +53,14 @@ class MyLCD {
     TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
     Point tp;
     uint16_t currentFreq = -1;
+    unsigned long timing = 0;
 
     onTouch _onTouch = NULL;
     Adafruit_GFX_Button chanelUp, chanelDown, volumeUp, volumeDown, autoSearch;
   public:
     void init();
     void updateDHT(MyDht *dht);
-    void updateFreq(uint16_t);
+    void updateFreq(uint16_t, char*);
     void detectTouch();
     void attachOnTouch(onTouch newFunction) {
       _onTouch = newFunction;

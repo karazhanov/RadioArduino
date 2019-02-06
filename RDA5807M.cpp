@@ -1,12 +1,13 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-#include "radio.h"
 #include "RDA5807M.h"
 
 // initialize all internals.
-bool RDA5807M::init() {
+bool RDA5807M::init(receiveServicenNameFunction receiveServiceName, receiveTextFunction receiveText, receiveTimeFunction receiveTime) {
   bool result = false; // no chip found yet.
+  rds = new RDSParser(receiveServiceName, receiveText, receiveTime);
+  rds->init();
   Wire.begin();
   Wire.beginTransmission(I2C_INDX);
   result = Wire.endTransmission();
@@ -159,7 +160,7 @@ RADIO_FREQ RDA5807M::getFrequency() {
 }  // getFrequency
 
 void RDA5807M::setFrequency(RADIO_FREQ newF) {
-  _freq = newFreq;
+  _freq = newF;
   uint16_t newChannel;
   uint16_t regChannel = registers[RADIO_REG_CHAN] & (RADIO_REG_CHAN_SPACE | RADIO_REG_CHAN_BAND);
   if (newF < _freqLow) newF = _freqLow;
@@ -254,8 +255,7 @@ void RDA5807M::getAudioInfo(AUDIO_INFO *info) {
 } // getAudioInfo()
 
 void RDA5807M::clearRDS() {
-  if (_sendRDS)
-    _sendRDS(0, 0, 0, 0);
+  rds->processData(0, 0, 0, 0);
 } // clearRDS()
 
 void RDA5807M::checkRDS() {
@@ -284,10 +284,9 @@ void RDA5807M::checkRDS() {
       if (result) {
         // new data in the registers
         // send to RDS decoder
-        rds.processData(registers[RADIO_REG_RDSA], registers[RADIO_REG_RDSB], registers[RADIO_REG_RDSC], registers[RADIO_REG_RDSD]);
+        rds->processData(registers[RADIO_REG_RDSA], registers[RADIO_REG_RDSB], registers[RADIO_REG_RDSC], registers[RADIO_REG_RDSD]);
       } // if
     } // if
-  }
 }
 
 /// Retrieve all the information related to the current radio receiving situation.

@@ -3,8 +3,7 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-
-#include "radio.h"
+#include "RDSParser.h"
 
 enum RADIO_BAND {
   RADIO_BAND_NONE = 0, ///< No band selected.
@@ -88,17 +87,16 @@ class RDA5807M {
     // ----- RDA5807M specific implementations -----
     const uint8_t MAXVOLUME = 15;   ///< max volume level for radio implementations.
 
-  RDA5807M(receiveServicenNameFunction receiveServiceName, receiveTextFunction receiveText, receiveTimeFunction receiveTime) {
+  RDA5807M() {
     memset(this, 0, sizeof(RDA5807M));
-    rds = new RDSParser(receiveServiceName, receiveText, receiveTime);
   };
 
-  bool   init();
+  bool   init(receiveServicenNameFunction receiveServiceName, receiveTextFunction receiveText, receiveTimeFunction receiveTime);
   void   term();
 
   // ----- Audio features -----
 
-  void    setVolume(uint8_t newVolume)
+  void    setVolume(uint8_t newVolume);
   uint8_t getVolume();                  ///< Retrieve the current output volume in the range 0..15.
   void    setBassBoost(bool switchOn);
   bool    getBassBoost();               ///< Retrieve the current bass boost mode setting.;
