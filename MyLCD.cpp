@@ -1,7 +1,5 @@
 #include "MyLCD.h"
 
-MyLCD::MyLCD() {}
-
 void MyLCD::init() {
   tft.reset();
   tft.begin(tft.readID());
@@ -109,15 +107,15 @@ TOUCH_INFO MyLCD::getPressedInfo() {
   return info;
 }
 
-void MyLCD::checkPress(Adafruit_GFX_Button &button, TOUCH_INFO &touch, int keyCode) {
+bool MyLCD::checkPress(Adafruit_GFX_Button &button, TOUCH_INFO &touch, int keyCode) {
   button.press(touch.pressed && button.contains(touch.xpos, touch.ypos));
   if (button.justPressed()) {
     button.drawButton(true);
     if (_onTouch) {
  			_onTouch(keyCode);
  		}
-    delay(500);
-    return;
+    timing = millis();
+    return true;
   }
   if (button.justReleased()) {
       button.drawButton();
@@ -125,6 +123,7 @@ void MyLCD::checkPress(Adafruit_GFX_Button &button, TOUCH_INFO &touch, int keyCo
 }
 
 void MyLCD::detectTouch() {
+  if (millis() - timing > touchDelay) {
    TOUCH_INFO touch = getPressedInfo();
 //   chanelUp.press(touch.pressed && chanelUp.contains(touch.xpos, touch.ypos));
 //   chanelDown.press(touch.pressed && chanelDown.contains(touch.xpos, touch.ypos));
@@ -135,47 +134,5 @@ void MyLCD::detectTouch() {
 
 
    checkPress(chanelUp, touch, CH_UP);
-
-   //   if (tp.z > MINPRESSURE && tp.z < MAXPRESSURE) {
-   //      ypos = map(tp.x, TS_MINX, TS_MAXX, 0, tft.height());
-   //      xpos = map(tp.y, TS_MINY, TS_MAXY, tft.width(), 0);
-   //     // ch+
-   //     if(pointInRect(xpos, ypos, 100, 130, 90, 40)) {
-   //        if (_onTouch) {
-   //    			_onTouch(CH_UP);
-   //    		}
-   //        return;
-   //     }
-   //     //  ch-
-   //     if(pointInRect(xpos, ypos, 100, 190, 90, 40)) {
-   //        if (_onTouch) {
-   //    			_onTouch(CH_DOWN);
-   //    		}
-   //        return;
-   //     }
-   //     // vol+
-   //     if(pointInRect(xpos, ypos, 4, 130, 90, 40)) {
-   //        if (_onTouch) {
-   //    			_onTouch(VOL_UP);
-   //    		}
-   //        return;
-   //     }
-   //     // vol-
-   //     if(pointInRect(xpos, ypos, 4, 190, 90, 40)) {
-   //        if (_onTouch) {
-   //    			_onTouch(VOL_DOWN);
-   //    		}
-   //        return;
-   //     }
-   //     // auto
-   //     if(pointInRect(xpos, ypos, 200, 130, 115, 100)) {
-   //        if (_onTouch) {
-   //    			_onTouch(AUTO);
-   //    		}
-   //        return;
-   //     }
-   // }
-   // if (_onTouch) {
-   //     _onTouch(NONE);
-   // }
+ }
 }

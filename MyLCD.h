@@ -31,6 +31,8 @@
 #define AUTO 5
 #define NONE -1
 
+#define touchDelay 500
+
 extern "C" {
   typedef void (*onTouch)(int button);
 }
@@ -44,23 +46,21 @@ typedef struct TOUCH_INFO {
 class MyLCD {
   private:
     void drawRadioUI();
-    bool pointInRect();
     TOUCH_INFO getPressedInfo();
-    void checkPress(Adafruit_GFX_Button &button, TOUCH_INFO &touch, int keyCode);
-    
+    bool checkPress(Adafruit_GFX_Button &button, TOUCH_INFO &touch, int keyCode);
+
     MCUFRIEND_kbv tft;       // hard-wired for UNO shields anyway.
     TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
     Point tp;
     uint16_t currentFreq = -1;
+
     onTouch _onTouch = NULL;
     Adafruit_GFX_Button chanelUp, chanelDown, volumeUp, volumeDown, autoSearch;
   public:
-    MyLCD();
     void init();
     void updateDHT(MyDht *dht);
     void updateFreq(uint16_t);
     void detectTouch();
-    bool pointInRect(uint16_t xpos, uint16_t ypos, uint16_t x0, uint16_t y0, uint16_t w, uint16_t h);
     void attachOnTouch(onTouch newFunction) {
       _onTouch = newFunction;
     }
